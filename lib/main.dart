@@ -1,6 +1,6 @@
 import 'package:background_location/background_location.dart';
 import 'package:flutter/material.dart';
-
+// Comment
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
