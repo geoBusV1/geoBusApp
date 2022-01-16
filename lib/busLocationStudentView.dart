@@ -1,8 +1,10 @@
 import 'package:background_location/background_location.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// Comment
-// Rahul-Test branch
+
+// implementing Ibrahim's Branch
+
+//testing change from desktop pc
 
 class BusLocationStudentView extends StatefulWidget {
   @override
@@ -10,7 +12,6 @@ class BusLocationStudentView extends StatefulWidget {
 }
 
 class _BusLocationStudentViewState extends State<BusLocationStudentView> {
-  
   Future<http.Response> fetchAlbum(query) {
     return http.get(Uri.parse(
         'https://geobus-server.ibrahimshah.repl.co/questions' + query));
@@ -71,7 +72,7 @@ class _BusLocationStudentViewState extends State<BusLocationStudentView> {
 
                       fetchAlbum("?latitude=$latitude&longitude=$longitude");
 
-                      print('''\n
+                      /*print('''\n
                         Latitude:  $latitude
                         Longitude: $longitude
                         Altitude: $altitude
@@ -79,7 +80,7 @@ class _BusLocationStudentViewState extends State<BusLocationStudentView> {
                         Bearing:  $bearing
                         Speed: $speed
                         Time: $time
-                      ''');
+                      ''');*/
                     });
                   },
                   child: Text('Start Location Service')),
