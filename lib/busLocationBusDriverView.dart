@@ -36,11 +36,12 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Bus Driver View'),
+          title: const Text('Bus Driver Homepage'),
         ),
         body: Center(
-          child: ListView(
-            children: <Widget>[
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
               locationData('Latitude: ' + latitude),
               locationData('Longitude: ' + longitude),
               locationData('Altitude: ' + altitude),
@@ -48,55 +49,33 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
               locationData('Bearing: ' + bearing),
               locationData('Speed: ' + speed),
               locationData('Time: ' + time),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Stack(
-                  children: <Widget>[
-                    Positioned.fill(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: <Color>[
-                              Color(0xFF0D47A1),
-                              Color(0xFF1976D2),
-                              Color(0xFF42A5F5),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.all(2.0),
-                        primary: Colors.white,
-                        textStyle: const TextStyle(fontSize: 20),
-                      ),
-                      onPressed: () async {
-                        await BackgroundLocation.setAndroidNotification(
-                          title: 'Background service is running',
-                          message: 'Background location in progress',
-                          icon: '@mipmap/ic_launcher',
-                        );
-                        //await BackgroundLocation.setAndroidConfiguration(1000);
-                        await BackgroundLocation.startLocationService(
-                            distanceFilter: 20);
-                        BackgroundLocation.getLocationUpdates((location) {
-                          setState(() {
-                            latitude = location.latitude.toString();
-                            longitude = location.longitude.toString();
-                            accuracy = location.accuracy.toString();
-                            altitude = location.altitude.toString();
-                            bearing = location.bearing.toString();
-                            speed = location.speed.toString();
-                            time = DateTime.fromMillisecondsSinceEpoch(
-                                    location.time!.toInt())
-                                .toString();
-                          });
+              const SizedBox(height: 30),
+              ElevatedButton(
+                  onPressed: () async {
+                    await BackgroundLocation.setAndroidNotification(
+                      title: 'Background service is running',
+                      message: 'Background location in progress',
+                      icon: '@mipmap/ic_launcher',
+                    );
+                    //await BackgroundLocation.setAndroidConfiguration(1000);
+                    await BackgroundLocation.startLocationService(
+                        distanceFilter: 20);
+                    BackgroundLocation.getLocationUpdates((location) {
+                      setState(() {
+                        latitude = location.latitude.toString();
+                        longitude = location.longitude.toString();
+                        accuracy = location.accuracy.toString();
+                        altitude = location.altitude.toString();
+                        bearing = location.bearing.toString();
+                        speed = location.speed.toString();
+                        time = DateTime.fromMillisecondsSinceEpoch(
+                                location.time!.toInt())
+                            .toString();
+                      });
 
-                          fetchAlbum(
-                              "?latitude=$latitude&longitude=$longitude");
+                      fetchAlbum("?latitude=$latitude&longitude=$longitude");
 
-                          /*print('''\n
+                      /*print('''\n
                         Latitude:  $latitude
                         Longitude: $longitude
                         Altitude: $altitude
@@ -105,47 +84,24 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
                         Speed: $speed
                         Time: $time
                       ''');*/
-                        });
-                      },
-                      child: const Text('Start Location Service'),
-                    ),
-                  ],
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Stack(
-                  children: <Widget>[
-                    Positioned.fill(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: <Color>[
-                              Color(0xFF0D47A1),
-                              Color(0xFF1976D2),
-                              Color(0xFF42A5F5),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.all(2.0),
-                        primary: Colors.white,
-                        textStyle: const TextStyle(fontSize: 20),
-                      ),
-                      onPressed: () {
-                        BackgroundLocation.stopLocationService();
-                      },
-                      child: const Text('Stop Location Service'),
-                    ),
-                  ],
-                ),
-              ),
+                    });
+                  },
+                  child: Text('Start Location Service')),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                  onPressed: () {
+                    BackgroundLocation.stopLocationService();
+                  },
+                  child: Text('Stop Location Service')),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                  onPressed: () {
+                    getCurrentLocation();
+                  },
+                  child: Text('Get Current Location')),
             ],
-          ),
         ),
+        )
       ),
     );
   }
