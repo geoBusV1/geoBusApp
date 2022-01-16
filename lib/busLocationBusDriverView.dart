@@ -65,10 +65,7 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 50,
-                      width: 200,
-                      child: TextButton(
+                    TextButton(
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.all(2.0),
                         primary: Colors.white,
@@ -111,7 +108,7 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
                         });
                       },
                       child: const Text('Start Location Service'),
-                    ),)
+                    ),
                   ],
                 ),
               ),
