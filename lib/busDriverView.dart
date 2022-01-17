@@ -6,12 +6,13 @@ import 'package:http/http.dart' as http;
 
 //testing change from desktop pc
 
-class BusLocationBusDriverView extends StatefulWidget {
+class BusDriverView extends StatefulWidget {
   @override
-  _BusLocationBusDriverViewState createState() => _BusLocationBusDriverViewState();
+  _BusDriverViewState createState() =>
+      _BusDriverViewState();
 }
 
-class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
+class _BusDriverViewState extends State<BusDriverView> {
   Future<http.Response> fetchAlbum(query) {
     return http.get(Uri.parse(
         'https://geobus-server.ibrahimshah.repl.co/questions' + query));
@@ -35,11 +36,12 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Background Location Service'),
+          title: const Text('Bus Driver Homepage'),
         ),
         body: Center(
-          child: ListView(
-            children: <Widget>[
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
               locationData('Latitude: ' + latitude),
               locationData('Longitude: ' + longitude),
               locationData('Altitude: ' + altitude),
@@ -47,6 +49,7 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
               locationData('Bearing: ' + bearing),
               locationData('Speed: ' + speed),
               locationData('Time: ' + time),
+              const SizedBox(height: 30),
               ElevatedButton(
                   onPressed: () async {
                     await BackgroundLocation.setAndroidNotification(
@@ -84,19 +87,21 @@ class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
                     });
                   },
                   child: Text('Start Location Service')),
+              const SizedBox(height: 30),
               ElevatedButton(
                   onPressed: () {
                     BackgroundLocation.stopLocationService();
                   },
                   child: Text('Stop Location Service')),
+              const SizedBox(height: 30),
               ElevatedButton(
                   onPressed: () {
                     getCurrentLocation();
                   },
                   child: Text('Get Current Location')),
             ],
-          ),
         ),
+        )
       ),
     );
   }
