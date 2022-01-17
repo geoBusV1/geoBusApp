@@ -136,6 +136,7 @@ packages:
       name: lists
       url: "https://pub.dartlang.org"
     source: hosted
+
     version: "1.0.1"
   matcher:
     dependency: transitive
@@ -143,6 +144,7 @@ packages:
       name: matcher
       url: "https://pub.dartlang.org"
     source: hosted
+
     version: "0.12.11"
   meta:
     dependency: transitive
@@ -165,6 +167,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0"
+
   positioned_tap_detector_2:
     dependency: transitive
     description:
@@ -186,6 +189,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1+1"
+
   sky_engine:
     dependency: transitive
     description: flutter
@@ -233,6 +237,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.3"
+
   transparent_image:
     dependency: transitive
     description:
@@ -247,6 +252,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+
   typed_data:
     dependency: transitive
     description:
