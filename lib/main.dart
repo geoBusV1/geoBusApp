@@ -1,8 +1,8 @@
 import 'package:bgloc/routeGenerator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'busLocationStudentView.dart';
-import 'busLocationBusDriverView.dart';
+import 'studentView.dart';
+import 'busDriverView.dart';
 import 'loginPage.dart';
 
 void main() => runApp(const MyApp());

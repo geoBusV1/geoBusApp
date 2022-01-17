@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'busLocationStudentView.dart';
-import 'busLocationBusDriverView.dart';
+import 'studentView.dart';
+import 'busDriverView.dart';
 import 'loginPage.dart';
 import 'main.dart';
 
@@ -10,10 +10,10 @@ class RouteGenerator {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => LoginPage());
-      case '/BusLocationBusDriverView':
-        return MaterialPageRoute(builder: (_) => BusLocationBusDriverView());
-      case '/BusLocationStudentView':
-        return MaterialPageRoute(builder: (_) => BusLocationStudentView());
+      case '/BusDriverView':
+        return MaterialPageRoute(builder: (_) => BusDriverView());
+      case '/StudentView':
+        return MaterialPageRoute(builder: (_) => StudentView());
       default:
         return errorRoute();
     }

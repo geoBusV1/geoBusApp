@@ -15,13 +15,13 @@ class LoginPage extends StatelessWidget {
           children: <Widget>[
             ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/BusLocationBusDriverView');
+                  Navigator.of(context).pushNamed('/BusDriverView');
                 },
                 child: Text('Login as a bus driver')),
             const SizedBox(height: 30),
             ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/BusLocationStudentView');
+                  Navigator.of(context).pushNamed('/StudentView');
                 },
                 child: Text('Login as a student')),
           ],

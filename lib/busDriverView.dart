@@ -6,13 +6,13 @@ import 'package:http/http.dart' as http;
 
 //testing change from desktop pc
 
-class BusLocationBusDriverView extends StatefulWidget {
+class BusDriverView extends StatefulWidget {
   @override
-  _BusLocationBusDriverViewState createState() =>
-      _BusLocationBusDriverViewState();
+  _BusDriverViewState createState() =>
+      _BusDriverViewState();
 }
 
-class _BusLocationBusDriverViewState extends State<BusLocationBusDriverView> {
+class _BusDriverViewState extends State<BusDriverView> {
   Future<http.Response> fetchAlbum(query) {
     return http.get(Uri.parse(
         'https://geobus-server.ibrahimshah.repl.co/questions' + query));
