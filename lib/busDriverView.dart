@@ -36,6 +36,8 @@ class _BusDriverViewState extends State<BusDriverView> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
+          //automaticallyImplyLeading: true,
+          leading: BackButton(onPressed: () => Navigator.pop(context),),
           title: const Text('Bus Driver Homepage'),
         ),
         body: Center(
