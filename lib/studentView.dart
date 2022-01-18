@@ -5,7 +5,9 @@ import 'package:latlong2/latlong.dart';
 class StudentView extends StatelessWidget{
   @override 
   Widget build(BuildContext context){
-    return Scaffold(body:BusMap(title: 'Flutter Demo Homepage'));
+    return Scaffold( appBar: AppBar(
+          //automaticallyImplyLeading: true,
+          leading: BackButton(onPressed: () => Navigator.pop(context),)), body:BusMap(title: 'Flutter Demo Homepage'));
   }
 }
 
