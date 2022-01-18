@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+<<<<<<< HEAD
 class StudentView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: BusMap(title: 'Flutter Demo Homepage'));
+=======
+class StudentView extends StatelessWidget{
+  @override 
+  Widget build(BuildContext context){
+    return Scaffold( appBar: AppBar(
+          //automaticallyImplyLeading: true,
+          leading: BackButton(onPressed: () => Navigator.pop(context),)), body:BusMap(title: 'Flutter Demo Homepage'));
+>>>>>>> main
   }
 }
 
