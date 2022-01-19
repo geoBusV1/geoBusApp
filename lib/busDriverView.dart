@@ -1,18 +1,23 @@
 import 'package:background_location/background_location.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 // implementing Ibrahim's Branch
 
 //testing change from desktop pc
 
 class BusDriverView extends StatefulWidget {
+ 
   @override
   _BusDriverViewState createState() =>
       _BusDriverViewState();
 }
 
 class _BusDriverViewState extends State<BusDriverView> {
+  
+ 
+
   Future<http.Response> fetchAlbum(query) {
     return http.get(Uri.parse(
         'https://geobus-server.ibrahimshah.repl.co/questions' + query));
@@ -28,8 +33,23 @@ class _BusDriverViewState extends State<BusDriverView> {
 
   @override
   void initState() {
+    
     super.initState();
+    connect();
   }
+
+  void connect(){
+    print("ASDASD");
+    IO.Socket socket = IO.io("https://geobus-server.ibrahimshah.repl.co/", <String, dynamic>{
+      'transports':['websocket'],
+      'autoConnect': true,
+    });
+    socket.connect();
+    socket.onConnect((data) => print("Connected"));
+    print(socket.connected);
+    //socket.emit('/test', "HELLOW ORLD");
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +74,7 @@ class _BusDriverViewState extends State<BusDriverView> {
               const SizedBox(height: 30),
               ElevatedButton(
                   onPressed: () async {
+                    connect();
                     await BackgroundLocation.setAndroidNotification(
                       title: 'Background service is running',
                       message: 'Background location in progress',
@@ -76,6 +97,9 @@ class _BusDriverViewState extends State<BusDriverView> {
                       });
 
                       fetchAlbum("?latitude=$latitude&longitude=$longitude");
+
+                    
+
 
                       /*print('''\n
                         Latitude:  $latitude
