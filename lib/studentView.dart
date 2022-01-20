@@ -1,64 +1,184 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'googleMapAPI.dart';
 
-class StudentView extends StatelessWidget{
-  @override 
-  Widget build(BuildContext context){
-    return Scaffold( appBar: AppBar(
-          //automaticallyImplyLeading: true,
-          leading: BackButton(onPressed: () => Navigator.pop(context),)), body:BusMap(title: 'Flutter Demo Homepage'));
+class StudentView extends StatefulWidget {
+  const StudentView({Key? key}) : super(key: key);
+
+  @override
+  _StudentViewState createState() => _StudentViewState();
+}
+
+class _StudentViewState extends State<StudentView> {
+  LatLng sourceLocation = LatLng(28.432864, 77.002563);
+  LatLng destinationLatlng = LatLng(28.431626, 77.002475);
+
+  Completer<GoogleMapController> _controller = Completer();
+
+  Set<Marker> _marker = Set<Marker>();
+
+  Set<Polyline> _polylines = Set<Polyline>();
+  List<LatLng> polylineCoordinates = [];
+  late PolylinePoints polylinePoints;
+
+  late StreamSubscription<LocationData> subscription;
+
+  LocationData? currentLocation;
+  late LocationData destinationLocation;
+  late Location location;
+
+  @override
+  void initState() {
+    super.initState();
+
+    location = Location();
+    polylinePoints = PolylinePoints();
+
+    subscription = location.onLocationChanged.listen((clocation) {
+      currentLocation = clocation;
+
+      updatePinsOnMap();
+    });
+
+    setInitialLocation();
   }
-}
 
-class BusMap extends StatefulWidget {
-  const BusMap({Key? key, required this.title}) : super(key: key);
+  void setInitialLocation() async {
+    await location.getLocation().then((value) {
+      currentLocation = value;
+      setState(() {});
+    });
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+    destinationLocation = LocationData.fromMap({
+      "latitude": destinationLatlng.latitude,
+      "longitude": destinationLatlng.longitude,
+    });
+  }
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  void showLocationPins() {
+    var sourceposition = LatLng(
+        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
 
-  final String title;
+    var destinationPosition =
+        LatLng(destinationLatlng.latitude, destinationLatlng.longitude);
 
- @override
-  State<BusMap> createState() => _BusMapState();
-}
+    _marker.add(Marker(
+      markerId: MarkerId('sourcePosition'),
+      position: sourceposition,
+    ));
 
-class _BusMapState extends State<BusMap> {
+    _marker.add(
+      Marker(
+        markerId: MarkerId('destinationPosition'),
+        position: destinationPosition,
+      ),
+    );
+
+    setPolylinesInMap();
+  }
+
+  void setPolylinesInMap() async {
+    var result = await polylinePoints.getRouteBetweenCoordinates(
+      GoogleMapApi().url,
+      PointLatLng(
+          currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
+      PointLatLng(destinationLatlng.latitude, destinationLatlng.longitude),
+    );
+
+    if (result.points.isNotEmpty) {
+      result.points.forEach((pointLatLng) {
+        polylineCoordinates
+            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+      });
+    }
+
+    setState(() {
+      _polylines.add(Polyline(
+        width: 5,
+        polylineId: PolylineId('polyline'),
+        color: Colors.blueAccent,
+        points: polylineCoordinates,
+      ));
+    });
+  }
+
+  void updatePinsOnMap() async {
+    CameraPosition cameraPosition = CameraPosition(
+      zoom: 20,
+      //tilt: 80,
+      tilt: 0,
+      bearing: 30,
+      target: LatLng(
+          currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
+    );
+
+    final GoogleMapController controller = await _controller.future;
+
+    controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+    var sourcePosition = LatLng(
+        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
+
+    setState(() {
+      _marker.removeWhere((marker) => marker.mapsId.value == 'sourcePosition');
+
+      _marker.add(Marker(
+        markerId: MarkerId('sourcePosition'),
+        position: sourcePosition,
+      ));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FlutterMap(
-    options: MapOptions(
-      center: LatLng(51.5, -0.09),
-      zoom: 13.0,
-    ),
-    layers: [
-      TileLayerOptions(
-        urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        subdomains: ['a', 'b', 'c'],
+    CameraPosition initialCameraPosition = CameraPosition(
+      zoom: 20,
+      tilt: 80,
+      bearing: 30,
+      target: currentLocation != null
+          ? LatLng(currentLocation!.latitude ?? 0.0,
+              currentLocation!.longitude ?? 0.0)
+          : LatLng(0.0, 0.0),
+    );
 
-      ),
-      MarkerLayerOptions(
-        markers: [
-          Marker(
-            width: 80.0,
-            height: 80.0,
-            point: LatLng(51.5, -0.09),
-            builder: (ctx) =>
-            Container(
-              child: FlutterLogo(),
+    return currentLocation == null
+        ? Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          )
+        : SafeArea(
+            child: Scaffold(
+                      appBar: AppBar(
+          //automaticallyImplyLeading: true,
+          leading: BackButton(onPressed: () => Navigator.pop(context),),
+          title: const Text('Location Map'),
+        ),
+              body: GoogleMap(
+                myLocationButtonEnabled: true,
+                compassEnabled: true,
+                markers: _marker,
+                polylines: _polylines,
+                mapType: MapType.normal,
+                initialCameraPosition: initialCameraPosition,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+
+                  showLocationPins();
+                },
+              ),
             ),
-          ),
-        ],
-      ),
-    ],
-  );
+          );
   }
 
-
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
 }
