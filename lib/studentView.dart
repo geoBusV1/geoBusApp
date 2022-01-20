@@ -1,130 +1,184 @@
 import 'dart:async';
-import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'googleMapAPI.dart';
 
-class StudentView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Maps',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  //MyHomePage({Key key }) : super(key: key);
+class StudentView extends StatefulWidget {
+  const StudentView({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _StudentViewState createState() => _StudentViewState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  late StreamSubscription _locationSubscription;
-  Location _locationTracker = Location();
-  late Marker marker;
-  late Circle circle;
-  late GoogleMapController _controller;
+class _StudentViewState extends State<StudentView> {
+  LatLng sourceLocation = LatLng(28.432864, 77.002563);
+  LatLng destinationLatlng = LatLng(28.431626, 77.002475);
 
-  static final CameraPosition initialLocation = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
+  Completer<GoogleMapController> _controller = Completer();
 
-  Future<Uint8List> getMarker() async {
-    ByteData byteData = await DefaultAssetBundle.of(context).load("assets/car_icon.png");
-    return byteData.buffer.asUint8List();
+  Set<Marker> _marker = Set<Marker>();
+
+  Set<Polyline> _polylines = Set<Polyline>();
+  List<LatLng> polylineCoordinates = [];
+  late PolylinePoints polylinePoints;
+
+  late StreamSubscription<LocationData> subscription;
+
+  LocationData? currentLocation;
+  late LocationData destinationLocation;
+  late Location location;
+
+  @override
+  void initState() {
+    super.initState();
+
+    location = Location();
+    polylinePoints = PolylinePoints();
+
+    subscription = location.onLocationChanged.listen((clocation) {
+      currentLocation = clocation;
+
+      updatePinsOnMap();
+    });
+
+    setInitialLocation();
   }
 
-  void updateMarkerAndCircle(LocationData newLocalData, Uint8List imageData) {
-    LatLng latlng = LatLng(newLocalData.latitude, newLocalData.longitude);
-    this.setState(() {
-      marker = Marker(
-          markerId: MarkerId("home"),
-          position: latlng,
-          rotation: newLocalData.heading,
-          draggable: false,
-          zIndex: 2,
-          flat: true,
-          anchor: Offset(0.5, 0.5),
-          icon: BitmapDescriptor.fromBytes(imageData));
-      circle = Circle(
-          circleId: CircleId("car"),
-          radius: newLocalData.accuracy,
-          zIndex: 1,
-          strokeColor: Colors.blue,
-          center: latlng,
-          fillColor: Colors.blue.withAlpha(70));
+  void setInitialLocation() async {
+    await location.getLocation().then((value) {
+      currentLocation = value;
+      setState(() {});
+    });
+
+    destinationLocation = LocationData.fromMap({
+      "latitude": destinationLatlng.latitude,
+      "longitude": destinationLatlng.longitude,
     });
   }
 
-  void getCurrentLocation() async {
-    try {
+  void showLocationPins() {
+    var sourceposition = LatLng(
+        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
 
-      Uint8List imageData = await getMarker();
-      var location = await _locationTracker.getLocation();
+    var destinationPosition =
+        LatLng(destinationLatlng.latitude, destinationLatlng.longitude);
 
-      updateMarkerAndCircle(location, imageData);
+    _marker.add(Marker(
+      markerId: MarkerId('sourcePosition'),
+      position: sourceposition,
+    ));
 
-      if (_locationSubscription != null) {
-        _locationSubscription.cancel();
-      }
+    _marker.add(
+      Marker(
+        markerId: MarkerId('destinationPosition'),
+        position: destinationPosition,
+      ),
+    );
 
+    setPolylinesInMap();
+  }
 
-      _locationSubscription = _locationTracker.onLocationChanged().listen((newLocalData) {
-        if (_controller != null) {
-          _controller.animateCamera(CameraUpdate.newCameraPosition(new CameraPosition(
-              bearing: 192.8334901395799,
-              target: LatLng(newLocalData.latitude, newLocalData.longitude),
-              tilt: 0,
-              zoom: 18.00)));
-          updateMarkerAndCircle(newLocalData, imageData);
-        }
+  void setPolylinesInMap() async {
+    var result = await polylinePoints.getRouteBetweenCoordinates(
+      GoogleMapApi().url,
+      PointLatLng(
+          currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
+      PointLatLng(destinationLatlng.latitude, destinationLatlng.longitude),
+    );
+
+    if (result.points.isNotEmpty) {
+      result.points.forEach((pointLatLng) {
+        polylineCoordinates
+            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
       });
-
-    } on PlatformException catch (e) {
-      if (e.code == 'PERMISSION_DENIED') {
-        debugPrint("Permission Denied");
-      }
     }
+
+    setState(() {
+      _polylines.add(Polyline(
+        width: 5,
+        polylineId: PolylineId('polyline'),
+        color: Colors.blueAccent,
+        points: polylineCoordinates,
+      ));
+    });
+  }
+
+  void updatePinsOnMap() async {
+    CameraPosition cameraPosition = CameraPosition(
+      zoom: 20,
+      //tilt: 80,
+      tilt: 0,
+      bearing: 30,
+      target: LatLng(
+          currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
+    );
+
+    final GoogleMapController controller = await _controller.future;
+
+    controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+    var sourcePosition = LatLng(
+        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
+
+    setState(() {
+      _marker.removeWhere((marker) => marker.mapsId.value == 'sourcePosition');
+
+      _marker.add(Marker(
+        markerId: MarkerId('sourcePosition'),
+        position: sourcePosition,
+      ));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    CameraPosition initialCameraPosition = CameraPosition(
+      zoom: 20,
+      tilt: 80,
+      bearing: 30,
+      target: currentLocation != null
+          ? LatLng(currentLocation!.latitude ?? 0.0,
+              currentLocation!.longitude ?? 0.0)
+          : LatLng(0.0, 0.0),
+    );
+
+    return currentLocation == null
+        ? Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          )
+        : SafeArea(
+            child: Scaffold(
+                      appBar: AppBar(
+          //automaticallyImplyLeading: true,
+          leading: BackButton(onPressed: () => Navigator.pop(context),),
+          title: const Text('Location Map'),
+        ),
+              body: GoogleMap(
+                myLocationButtonEnabled: true,
+                compassEnabled: true,
+                markers: _marker,
+                polylines: _polylines,
+                mapType: MapType.normal,
+                initialCameraPosition: initialCameraPosition,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+
+                  showLocationPins();
+                },
+              ),
+            ),
+          );
   }
 
   @override
   void dispose() {
-    if (_locationSubscription != null) {
-      _locationSubscription.cancel();
-    }
+    subscription.cancel();
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Hello World!"),
-      ),
-      body: GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition: initialLocation,
-        markers: Set.of((marker != null) ? [marker] : []),
-        circles: Set.of((circle != null) ? [circle] : []),
-        onMapCreated: (GoogleMapController controller) {
-          _controller = controller;
-        },
-
-      ),
-      floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.location_searching),
-          onPressed: () {
-            getCurrentLocation();
-          }),
-    );
   }
 }
