@@ -154,11 +154,13 @@ class _StudentViewState extends State<StudentView> {
           )
         : SafeArea(
             child: Scaffold(
-                      appBar: AppBar(
-          //automaticallyImplyLeading: true,
-          leading: BackButton(onPressed: () => Navigator.pop(context),),
-          title: const Text('Location Map'),
-        ),
+              appBar: AppBar(
+                //automaticallyImplyLeading: true,
+                leading: BackButton(
+                  onPressed: () => Navigator.pop(context),
+                ),
+                title: const Text('Location Map'),
+              ),
               body: GoogleMap(
                 myLocationButtonEnabled: true,
                 compassEnabled: true,
