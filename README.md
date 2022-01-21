@@ -1,6 +1,8 @@
-# bgloc
+# GeoSonic.
 
-A new Flutter project.
+Listening to Lil Uzi Vert is cool. Staying safe is even cooler.
+
+A GPS-based emergency safety app for large venues.
 
 ## Getting Started
 
