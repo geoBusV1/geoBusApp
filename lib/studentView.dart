@@ -1,184 +1,77 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
-import 'googleMapAPI.dart';
 
-class StudentView extends StatefulWidget {
-  const StudentView({Key? key}) : super(key: key);
-
+class StudentView extends StatelessWidget {
   @override
-  _StudentViewState createState() => _StudentViewState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+            appBar: AppBar(
+              //automaticallyImplyLeading: true,
+              leading: BackButton(
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text('Student Homepage'),
+            ),
+            body: MapSample())
+        //title: 'Flutter Google Maps Demo',
+        //home: MapSample(),
+        );
+  }
 }
 
-class _StudentViewState extends State<StudentView> {
-  LatLng sourceLocation = LatLng(28.432864, 77.002563);
-  LatLng destinationLatlng = LatLng(28.431626, 77.002475);
+class MapSample extends StatefulWidget {
+  @override
+  State<MapSample> createState() => MapSampleState();
+}
 
+class MapSampleState extends State<MapSample> {
   Completer<GoogleMapController> _controller = Completer();
 
-  Set<Marker> _marker = Set<Marker>();
-
-  Set<Polyline> _polylines = Set<Polyline>();
-  List<LatLng> polylineCoordinates = [];
-  late PolylinePoints polylinePoints;
-
-  late StreamSubscription<LocationData> subscription;
-
-  LocationData? currentLocation;
-  late LocationData destinationLocation;
-  late Location location;
-
-  @override
-  void initState() {
-    super.initState();
-
-    location = Location();
-    polylinePoints = PolylinePoints();
-
-    subscription = location.onLocationChanged.listen((clocation) {
-      currentLocation = clocation;
-
-      updatePinsOnMap();
-    });
-
-    setInitialLocation();
-  }
-
-  void setInitialLocation() async {
-    await location.getLocation().then((value) {
-      currentLocation = value;
-      setState(() {});
-    });
-
-    destinationLocation = LocationData.fromMap({
-      "latitude": destinationLatlng.latitude,
-      "longitude": destinationLatlng.longitude,
-    });
-  }
-
-  void showLocationPins() {
-    var sourceposition = LatLng(
-        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
-
-    var destinationPosition =
-        LatLng(destinationLatlng.latitude, destinationLatlng.longitude);
-
-    _marker.add(Marker(
-      markerId: MarkerId('sourcePosition'),
-      position: sourceposition,
-    ));
-
-    _marker.add(
-      Marker(
-        markerId: MarkerId('destinationPosition'),
-        position: destinationPosition,
-      ),
-    );
-
-    setPolylinesInMap();
-  }
-
-  void setPolylinesInMap() async {
-    var result = await polylinePoints.getRouteBetweenCoordinates(
-      GoogleMapApi().url,
-      PointLatLng(
-          currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
-      PointLatLng(destinationLatlng.latitude, destinationLatlng.longitude),
-    );
-
-    if (result.points.isNotEmpty) {
-      result.points.forEach((pointLatLng) {
-        polylineCoordinates
-            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
-      });
-    }
-
-    setState(() {
-      _polylines.add(Polyline(
-        width: 5,
-        polylineId: PolylineId('polyline'),
-        color: Colors.blueAccent,
-        points: polylineCoordinates,
-      ));
-    });
-  }
-
-  void updatePinsOnMap() async {
-    CameraPosition cameraPosition = CameraPosition(
-      zoom: 20,
-      //tilt: 80,
-      tilt: 0,
-      bearing: 30,
-      target: LatLng(
-          currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
-    );
-
-    final GoogleMapController controller = await _controller.future;
-
-    controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-
-    var sourcePosition = LatLng(
-        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
-
-    setState(() {
-      _marker.removeWhere((marker) => marker.mapsId.value == 'sourcePosition');
-
-      _marker.add(Marker(
-        markerId: MarkerId('sourcePosition'),
-        position: sourcePosition,
-      ));
-    });
-  }
+  static final CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.4746,
+  );
+  static final _kGooglePlexMarker = Marker(
+      markerId: MarkerId('_kGooglePlex'),
+      infoWindow: InfoWindow(title: 'Google Plex'),
+      icon: BitmapDescriptor.defaultMarker,
+      position: LatLng(37.42796133580664, -122.085749655962));
+  static final CameraPosition _kLake = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(37.43296265331129, -122.08832357078792),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
+  static final _kLakeMarker = Marker(
+      markerId: MarkerId('_kLakeMarker'),
+      infoWindow: InfoWindow(title: 'Lake'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      position: LatLng(37.43296265331129, -122.08832357078792));
 
   @override
   Widget build(BuildContext context) {
-    CameraPosition initialCameraPosition = CameraPosition(
-      zoom: 20,
-      tilt: 80,
-      bearing: 30,
-      target: currentLocation != null
-          ? LatLng(currentLocation!.latitude ?? 0.0,
-              currentLocation!.longitude ?? 0.0)
-          : LatLng(0.0, 0.0),
+    return new Scaffold(
+      body: GoogleMap(
+        mapType: MapType.normal,
+        markers: {_kGooglePlexMarker,
+        _kLakeMarker},
+        initialCameraPosition: _kGooglePlex,
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _goToTheLake,
+        label: Text('To the lake!'),
+        icon: Icon(Icons.directions_boat),
+      ),
     );
-
-    return currentLocation == null
-        ? Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            alignment: Alignment.center,
-            child: CircularProgressIndicator(),
-          )
-        : SafeArea(
-            child: Scaffold(
-                      appBar: AppBar(
-          //automaticallyImplyLeading: true,
-          leading: BackButton(onPressed: () => Navigator.pop(context),),
-          title: const Text('Location Map'),
-        ),
-              body: GoogleMap(
-                myLocationButtonEnabled: true,
-                compassEnabled: true,
-                markers: _marker,
-                polylines: _polylines,
-                mapType: MapType.normal,
-                initialCameraPosition: initialCameraPosition,
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
-
-                  showLocationPins();
-                },
-              ),
-            ),
-          );
   }
 
-  @override
-  void dispose() {
-    subscription.cancel();
-    super.dispose();
+  Future<void> _goToTheLake() async {
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }
 }
