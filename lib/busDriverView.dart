@@ -8,6 +8,13 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 //testing change from desktop pc
 
 class BusDriverView extends StatefulWidget {
+  IO.Socket socket =
+      //https://sockettest.ibrahimshah.repl.co/
+      IO.io("https://geobus-server.ibrahimshah.repl.co/", <String, dynamic>{
+    'transports': ['websocket'],
+    'autoConnect': false,
+  });
+
   @override
   _BusDriverViewState createState() => _BusDriverViewState();
 }
@@ -35,14 +42,15 @@ class _BusDriverViewState extends State<BusDriverView> {
   void connect() {
     print("ASDASD");
     IO.Socket socket =
-        IO.io("https://sockettest.ibrahimshah.repl.co/", <String, dynamic>{
+        //https://sockettest.ibrahimshah.repl.co/
+        IO.io("https://geobus-server.ibrahimshah.repl.co/", <String, dynamic>{
       'transports': ['websocket'],
-      'autoConnect': true,
+      'autoConnect': false,
     });
     socket.connect();
     socket.onConnect((data) => print("Connected"));
     print(socket.connected);
-    //socket.emit('/test', "HELLOW ORLD");
+    socket.emit('/test', "HELLOW ORLD");
   }
 
   @override
@@ -70,7 +78,7 @@ class _BusDriverViewState extends State<BusDriverView> {
                 const SizedBox(height: 30),
                 ElevatedButton(
                     onPressed: () async {
-                      connect();
+                      //connect();
                       await BackgroundLocation.setAndroidNotification(
                         title: 'Background service is running',
                         message: 'Background location in progress',
@@ -81,6 +89,7 @@ class _BusDriverViewState extends State<BusDriverView> {
                           distanceFilter: 20);
                       BackgroundLocation.getLocationUpdates((location) {
                         setState(() {
+                          //socket.emit('test', 'data');
                           latitude = location.latitude.toString();
                           longitude = location.longitude.toString();
                           accuracy = location.accuracy.toString();
