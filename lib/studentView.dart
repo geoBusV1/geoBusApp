@@ -50,14 +50,23 @@ class MapSampleState extends State<MapSample> {
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       position: LatLng(37.43296265331129, -122.08832357078792));
 
+  static final _kPolyline = Polyline(
+    polylineId: PolylineId('_kPolyline'),
+    points: [
+      LatLng(37.42796133580664, -122.085749655962),
+      LatLng(37.43296265331129, -122.08832357078792),
+    ],
+    width: 5,
+  );
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       body: GoogleMap(
         mapType: MapType.normal,
-        markers: {_kGooglePlexMarker,
-        _kLakeMarker},
+        markers: {_kGooglePlexMarker, _kLakeMarker},
+        polylines: {_kPolyline,},
         initialCameraPosition: _kGooglePlex,
+        minMaxZoomPreference: MinMaxZoomPreference(13, 22),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
