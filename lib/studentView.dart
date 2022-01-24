@@ -38,7 +38,7 @@ class MapSampleState extends State<MapSample> {
       markerId: MarkerId('_kGooglePlex'),
       infoWindow: InfoWindow(title: 'Google Plex'),
       icon: BitmapDescriptor.defaultMarker,
-      position: LatLng(37.42796133580664, -122.085749655962));
+      position: LatLng(41.76563, -88.10745));
   static final CameraPosition _kLake = CameraPosition(
       bearing: 192.8334901395799,
       target: LatLng(37.43296265331129, -122.08832357078792),
@@ -53,7 +53,7 @@ class MapSampleState extends State<MapSample> {
   static final _kPolyline = Polyline(
     polylineId: PolylineId('_kPolyline'),
     points: [
-      LatLng(37.42796133580664, -122.085749655962),
+      LatLng(41.76563, -88.10745),
       LatLng(37.43296265331129, -122.08832357078792),
     ],
     width: 5,
@@ -66,16 +66,16 @@ class MapSampleState extends State<MapSample> {
         markers: {_kGooglePlexMarker, _kLakeMarker},
         polylines: {_kPolyline,},
         initialCameraPosition: _kGooglePlex,
-        minMaxZoomPreference: MinMaxZoomPreference(13, 22),
+        minMaxZoomPreference: MinMaxZoomPreference(0, 22),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      /*floatingActionButton: FloatingActionButton.extended(
         onPressed: _goToTheLake,
         label: Text('To the lake!'),
         icon: Icon(Icons.directions_boat),
-      ),
+      ),*/
     );
   }
 
